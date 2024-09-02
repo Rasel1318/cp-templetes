@@ -66,23 +66,6 @@ void solve(){
 
     sgTree seg1 = sgTree(n);
     seg1.build(0, 0, n-1, arr);
-
-    // cout<<seg1.query(0, 0, n-1, 2, 5)<<endl;
-
-    int q;cin>>q;
-    while(q--){
-        int type; cin>>type;
-        if(type){
-            int l, r;
-            cin>>l>>r;
-            cout<<seg1.query(0, 0, n-1, l, r)<<endl;
-        }else{
-            int i, val;
-            cin>>i>>val; i--;
-            seg1.update(0, 0, n-1, i, val);
-            arr[i] = val;
-        }
-    }
     
 }
 
