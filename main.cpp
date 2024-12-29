@@ -1,8 +1,9 @@
 #include <bits/stdc++.h>
-// /opt/lampp
+
 using namespace std;
 using ll = long long int;
-using pii = pair<ll,ll>;
+using lld = long double;
+using pii = pair<int,int>;
 using vi = vector<ll>;
 using vii = vector<pii>;
 
@@ -18,80 +19,67 @@ using vii = vector<pii>;
 #define ss second
 
 void solve(){
-    int n, m, st, lft, speed;
-    cin >> n>>m>>st>>lft>>speed;
-    vector<int> stair(st), lift(lft);
-    for(auto &i:stair) cin>>i;
-    for(auto &i:lift) cin>>i;
+    ll n, k;
+    cin>>n>>k;
 
-    sort(all(stair));
-    sort(all(lift));
+    int l = INT_MAX, r = INT_MIN;
 
-
-    auto check_left = [&](vector<int> &v, int x) -> ll{
-        if(v.empty()) return -1;
-        ll l = 0, r = v.size()-1, ans = -1;
-        while(l<=r){
-            ll mid = l+(r-l)/2;
-            if(v[mid]<=x){
-                ans = mid;
-                l = mid+1;
-            }else r = mid-1;
-        }
-        return (ans!=-1)?v[ans]:-1;
-    };
-
-    auto check_right = [&](vector<int> &v, int x) -> ll{
-        if(v.empty()) return -1;
-        ll l = 0, r = v.size()-1, ans = -1;
-        while(l<=r){
-            ll mid = l+(r-l)/2;
-            if(v[mid]>=x){
-                ans = mid;
-                r = mid-1;
-            }else l = mid+1;
-        }
-        return (ans!=-1)?v[ans]:-1;
-    };
-
-    auto time_st = [&](int x1, int y1, int x2, int y2) -> ll{
-        ll left = check_left(stair, y1);
-        ll right = check_right(stair, y1);
-
-        ll ans = INT_MAX;
-        if(left!=-1){
-            ans = min(ans, abs(y1-left)+abs(x2-x1)+abs(y2-left));
-        }if(right != -1){
-            ans = min(ans, abs(y1-right)+abs(x2-x1)+abs(y2-right));
-        }
-        return ans;
-    };
-
-    auto time_lift = [&](int x1, int y1, int x2, int y2) -> ll{
-        ll left = check_left(lift, y1);
-        ll right = check_right(lift, y1);
-
-        ll ans = INT_MAX;
-        if(left!=-1){
-            ans = min(ans, abs(y1-left)+(ll)ceil((double)(abs(x2-x1))/(double)speed)+abs(y2-left));
-        }if(right != -1){
-            ans = min(ans, abs(y1-right)+(ll)ceil((double)(abs(x2-x1))/(double)speed)+abs(y2-right));
-        }
-        return ans;
-    };
-
-    int q; cin>>q;
-    while(q--){
-        int x1, y1, x2, y2;
-        cin>>x1>>y1>>x2>>y2;
-
-        cout<<min(time_st(x1, y1, x2, y2), time_lift(x1, y1, x2, y2))<<endl;
+    vector<pair<int, pii>> a(n);
+    for(auto &i:a){
+        cin>>i.ff>>i.ss.ff>>i.ss.ss;
+        l = min(l, i.ff);
+        r = max(l, i.ff);
     }
+
+    auto check = [&](int x)->bool{
+        multimap<int,int> recive;
+        for(auto i:a) recive.insert({i.ss.ss, i.ff}); // Recive_cost , numberOfBattires 
+        ll cost = 0;
+
+        auto it = recive.begin();
+
+        auto find_Recive = [&](int need)->bool{
+            while(it!=recive.end() && need>0){
+                if(it->ss>=x) it++;
+
+                int find_min = min(x-it->ss, need);
+                need -= find_min;
+                it->ss += find_min;
+                cost += find_min*1ll*it->ff;
+            }
+            return need==0;
+        };
+
+        for(auto i:a){
+            if(i.ff>x){
+                cost += (i.ff-x)*1ll*i.ss.ff;
+                // auto its = recive.find({i.ss.ss, i.ff});
+                // its.ss = x;
+                bool f = find_Recive(i.ff-x);
+                if(!f) return false;
+            }
+        }
+        return cost<=k;
+    };
+
+    int ans = INT_MAX; // Find the smallest M.
+
+    while(l<=r){
+        int mid = l+(r-l)/2;
+        if(check(mid)){
+            ans = mid;
+            r = mid-1;
+        }else l = mid+1;
+    }
+    cout<<ans<<endl;
 }
 
-int main(){
+int32_t main(){
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
+    // freopen("txt.in", "r", stdin);
+    // freopen("txt.out", "w", stdout);
+    // cout<<std::setprecision(35);
     
     int _ = 1;
     while(_--){
